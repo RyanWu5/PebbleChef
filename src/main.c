@@ -1,5 +1,7 @@
 #include <pebble.h>
+#include "main.h"
 #include "create_windows.h"
+#include "button_handlers.h"
 
 //APP_LOG(APP_LOG_LEVEL_DEBUG, "%s():%d", __func__, __LINE__);  
 
@@ -12,6 +14,9 @@ void handle_init(void) {
   
   // Push splash_window to stack
   window_stack_push(splash_window, true);
+  
+  // Register motion handler
+  register_tap_handler();
 }
 
 void handle_deinit(void) {

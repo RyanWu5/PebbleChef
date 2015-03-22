@@ -5,8 +5,8 @@
 
 #include <string.h>
   
-#define TITLE_FONT FONT_KEY_GOTHIC_18_BOLD
-#define DESCRIPTION_FONT FONT_KEY_GOTHIC_18
+#define TITLE_FONT FONT_KEY_BITHAM_42_LIGHT
+#define DESCRIPTION_FONT FONT_KEY_GOTHIC_24
 #define TIMER_FONT FONT_KEY_GOTHIC_18_BOLD
 
 /* * * * * * * * *
@@ -69,13 +69,13 @@ Window* create_splash_window() {
  * Timer *
  * * * * */
 
+char buffer[16];
+
 time_t timer_end;
 TextLayer *timer_layer;
+bool timer_running = false;
 
 static void timer_handler(struct tm *tick_time, TimeUnits units_changed) {
-  // String buffer to print timer
-  char buffer[16];
-  
   // Calculate elapsed time
   time_t remaining_time = timer_end - time(NULL);
   
@@ -93,6 +93,9 @@ static void timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   } else {
     // No time remaining
     strncpy(buffer, "00m:00s", sizeof(buffer));
+    timer_running = false;
+    vibes_long_pulse();
+    tick_timer_service_unsubscribe();
   }
   
   // Print to timer layer
@@ -100,9 +103,19 @@ static void timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   
 }
 
-static void start_timer(time_t duration) {
+void start_timer(time_t duration) {
+  // Check if timer is already running
+  if (timer_running) {
+    return;
+  } else {
+    timer_running = true;
+  }
+  
   // Set end time
   timer_end = time(NULL) + duration;
+  
+  // Send end time
+  send_2_values(REQUEST_PIN_KEY, step_info.sequence, REQUEST_PIN_KEY, timer_end);
   
   // Register time callback function
   tick_timer_service_subscribe(SECOND_UNIT, timer_handler);
@@ -125,14 +138,14 @@ static void timer_window_load(Window* window) {
   timer_window_data* user_data = (timer_window_data*) window_get_user_data(window);
   
   // Create title_layer
-  user_data->title_layer = text_layer_create(GRect(5, 0, 134, 24));
+  user_data->title_layer = text_layer_create(GRect(5, 0, 134, 45));
   text_layer_set_background_color(user_data->title_layer, GColorClear);
   text_layer_set_text_color(user_data->title_layer, GColorBlack);
   text_layer_set_font(user_data->title_layer, fonts_get_system_font(TITLE_FONT));  
   text_layer_set_text(user_data->title_layer, user_data->title);
   
   // Create description layer
-  user_data->description_layer = text_layer_create(GRect(5, 24, 134, 144));
+  user_data->description_layer = text_layer_create(GRect(5, 45, 134, 100));
   text_layer_set_background_color(user_data->description_layer, GColorClear);
   text_layer_set_text_color(user_data->description_layer, GColorBlack);
   text_layer_set_font(user_data->description_layer, fonts_get_system_font(DESCRIPTION_FONT));
@@ -140,16 +153,15 @@ static void timer_window_load(Window* window) {
   text_layer_set_text(user_data->description_layer, user_data->description);
   
   // Create timer layer
-  timer_layer = text_layer_create(GRect(5, 100, 134, 24));
+  timer_layer = text_layer_create(GRect(5, 124, 134, 24));
   text_layer_set_background_color(timer_layer, GColorBlack);
   text_layer_set_text_color(timer_layer, GColorWhite);
   text_layer_set_font(timer_layer, fonts_get_system_font(TIMER_FONT));
   text_layer_set_text_alignment(timer_layer, GTextAlignmentCenter);
   
   // Set timer text
-  char buffer[16];
   time_t duration = user_data->duration;
-  struct tm* local_time = localtime(&duration);
+  struct tm* local_time = localtime(&duration);  
   if (duration >= 3600) {
     strftime(buffer, sizeof(buffer), "%Hh:%Mm", local_time);
   } else {
@@ -224,14 +236,14 @@ void step_window_load(Window* window) {
   step_window_data* user_data = (step_window_data*) window_get_user_data(window);
   
   // Create title_layer
-  user_data->title_layer = text_layer_create(GRect(5, 0, 134, 24));
+  user_data->title_layer = text_layer_create(GRect(5, 0, 134, 45));
   text_layer_set_background_color(user_data->title_layer, GColorClear);
   text_layer_set_text_color(user_data->title_layer, GColorBlack);
   text_layer_set_font(user_data->title_layer, fonts_get_system_font(TITLE_FONT));
   text_layer_set_text(user_data->title_layer, user_data->title);
   
   // Create description layer
-  user_data->description_layer = text_layer_create(GRect(5, 24, 134, 144));
+  user_data->description_layer = text_layer_create(GRect(5, 45, 134, 100));
   text_layer_set_background_color(user_data->description_layer, GColorClear);
   text_layer_set_text_color(user_data->description_layer, GColorBlack);
   text_layer_set_font(user_data->description_layer, fonts_get_system_font(DESCRIPTION_FONT));  

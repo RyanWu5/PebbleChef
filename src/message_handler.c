@@ -1,21 +1,11 @@
 #include <pebble.h>
 #include <string.h>
+#include "main.h"
 #include "message_handler.h"
 #include "create_windows.h"
-  
+
 // Extern step_info read in over network
 step_info_t step_info;
-
-// Source
-  
-// Key values for AppMessage Dictionary
-enum key_t {
-	SEQUENCE_KEY,
-	TITLE_KEY,
-	DESCRIPTION_KEY,
-	DURATION_KEY,
-	MORE_KEY
-};
 
 // More data flag to decide when to update window
 bool more_data = false;
@@ -25,12 +15,6 @@ static char *strdup(const char *str) {
   char *ret = calloc(1, len);
   memcpy(ret, str, len);
   return ret;
-}
-
-// Replace src with dst
-static void replace(char* dst, const char* src) {
-  realloc((void*)dst, strlen(src) + 1);
-  strcpy(dst, src);
 }
 
 // Extend src from the end of dst and reallocate
@@ -102,11 +86,24 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
   
   // If no more data available, then update window
   if (!more_data) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "%s():%d:\n", __func__, __LINE__);
-    Window *step_window = create_step_window(step_info.title, step_info.description);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "AppMessage Received Data:\n%d\n%s\n%s\n%s\n%d",
            step_info.sequence, step_info.title, step_info.description, step_info.duration, more_data);
-    window_stack_push(step_window, true);
+    
+    // If top window exists, delete
+    if (top_window) {
+      window_stack_pop(true);
+      window_destroy(top_window);
+    }
+    
+    // Top window type depends on whether or not duration > 0
+    if (atoi(step_info.duration) > 0) {
+      top_window = create_timer_window(step_info.title, step_info.description, atoi(step_info.duration));
+    } else {
+      top_window = create_step_window(step_info.title, step_info.description);
+    }
+    
+    // Push top window onto stack
+    window_stack_push(top_window, true);
   }
 }
   
@@ -126,6 +123,21 @@ void send_value(const uint32_t key, const uint8_t value) {
   app_message_outbox_begin(&iter);
   dict_write_uint8(iter, key, value);
   dict_write_end(iter);
+  app_message_outbox_send();
+}
+
+void send_2_values(const uint32_t key1, const uint8_t value1, const uint32_t key2, time_t value2) {
+  // Send key/value pairs to outbox
+  DictionaryIterator *iter;
+  
+  app_message_outbox_begin(&iter);
+  dict_write_uint8(iter, key1, value1);
+  dict_write_end(iter);
+  
+  app_message_outbox_begin(&iter);
+  dict_write_uint32(iter, key1, (unsigned long)value2);
+  dict_write_end(iter);
+  
   app_message_outbox_send();
 }
 

@@ -1,0 +1,26 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "rwu10@binghamton.edu",
+    "longName": "PebbleChef",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/splash_bw.png",
+                "name": "SPLASH",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "2",
+    "shortName": "PebbleChef",
+    "uuid": "07e166bf-5673-477a-a862-94ad7c08e5ed",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}

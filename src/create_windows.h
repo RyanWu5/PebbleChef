@@ -1,3 +1,5 @@
+/* Copyright by Ryan Wu 2015 */
+
 #pragma once
 
 Window* create_splash_window();

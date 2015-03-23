@@ -1,3 +1,5 @@
+/* Copyright by Ryan Wu 2015 */
+
 #include <pebble.h>
 #include <string.h>
 #include "main.h"

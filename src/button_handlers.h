@@ -1,3 +1,5 @@
+/* Copyright by Ryan Wu 2015 */
+
 #pragma once
 
 void splash_click_config_provider(void *context);

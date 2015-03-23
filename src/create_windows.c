@@ -1,3 +1,5 @@
+/* Copyright by Ryan Wu 2015 */
+
 #include <pebble.h>
 #include "create_windows.h"
 #include "button_handlers.h"

@@ -1,3 +1,5 @@
+/* Copyright by Ryan Wu 2015 */
+
 #pragma once
 
 void send_value(const uint32_t key, const uint8_t value);
